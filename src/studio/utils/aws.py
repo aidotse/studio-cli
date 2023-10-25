@@ -105,7 +105,7 @@ def get_presigned_urls(config: object, users: list) -> list:
                 DomainId=config.domain_id,
                 UserProfileName=username,
                 SessionExpirationDurationInSeconds=43200,  # 3 days
-                ExpiresInSeconds=300,  # 3 days
+                ExpiresInSeconds=300,  # 5 minutes
                 SpaceName=team,
             )
 
