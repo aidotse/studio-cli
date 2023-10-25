@@ -19,7 +19,7 @@ def create_sagemaker_user_profiles(config: object, users: list) -> None:
 
     with click.progressbar(users, label="Creating SM user profiles") as users_list:
         for user in users_list:
-            username = user.split("@")[0]
+            username = user.split("@")[0].replace(".", "-")
             try:
                 sm_client.describe_user_profile(
                     DomainId=config.domain_id, UserProfileName=username
@@ -82,7 +82,9 @@ def add_users_to_ddb(config: object, users: object) -> None:
     try:
         with table_resource.batch_writer() as batch:
             for user_email, team in users.items():
-                batch.put_item(Item={"pk": user_email, "team": team})
+                batch.put_item(
+                    Item={"pk": user_email, "team": team, "domain-id": config.domain_id}
+                )
         click.echo("Users persisted in DynamoDB.")
     except Exception as e:
         click.secho(e)
@@ -95,7 +97,7 @@ def get_presigned_urls(config: object, users: list) -> list:
 
     users_to_urls = {}
     for user_email, team in users.items():
-        username = user_email.split("@")[0]
+        username = user_email.split("@")[0].replace(".", "-")
         team = str(team)
 
         try:
@@ -128,7 +130,7 @@ def delete_users(config: object, user_emails: str) -> None:
         user_emails, label="Deleting SM user profiles"
     ) as users_emails:
         for email in users_emails:
-            username = email.split("@")[0]
+            username = email.split("@")[0].replace(".", "-")
             try:
                 sm_client.delete_user_profile(
                     DomainId=config.domain_id, UserProfileName=username
