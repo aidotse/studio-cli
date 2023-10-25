@@ -4,13 +4,6 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 
-org_client = boto3.client("organizations")
-identity_store_client = boto3.client("identitystore")
-sso_admin_client = boto3.client("sso-admin")
-
-sm_client = boto3.client("sagemaker")
-
-
 def create_sagemaker_user_profiles(config: object, users: list) -> None:
     """Create SageMaker Studio user profiles
 
@@ -21,6 +14,8 @@ def create_sagemaker_user_profiles(config: object, users: list) -> None:
     Returns:
         None
     """
+
+    sm_client = boto3.client("sagemaker", config.region)
 
     with click.progressbar(users, label="Creating SM user profiles") as users_list:
         for user in users_list:
@@ -56,6 +51,8 @@ def create_sagemaker_spaces(config: object, team_list: list) -> None:
     Returns:
         None
     """
+
+    sm_client = boto3.client("sagemaker", config.region)
 
     with click.progressbar(team_list, label="Creating SM team spaces") as teams:
         for team in teams:
@@ -93,6 +90,9 @@ def add_users_to_ddb(config: object, users: object) -> None:
 
 def get_presigned_urls(config: object, users: list) -> list:
     """get presigned login URL for each user"""
+
+    sm_client = boto3.client("sagemaker", config.region)
+
     users_to_urls = {}
     for user_email, team in users.items():
         username = user_email.split("@")[0]
@@ -122,6 +122,8 @@ def get_presigned_urls(config: object, users: list) -> list:
 def delete_users(config: object, user_emails: str) -> None:
     """Deletes all SageMaker user profiles"""
 
+    sm_client = boto3.client("sagemaker", config.region)
+
     with click.progressbar(
         user_emails, label="Deleting SM user profiles"
     ) as users_emails:
@@ -139,6 +141,8 @@ def delete_users(config: object, user_emails: str) -> None:
 
 def delete_spaces(config: object) -> None:
     """Deletes all SageMaker spaces related to the Domain ID in the config file"""
+
+    sm_client = boto3.client("sagemaker", config.region)
 
     response = sm_client.list_spaces(DomainIdEquals=config.domain_id)
     spaces = response["Spaces"]
@@ -158,6 +162,38 @@ def delete_spaces(config: object) -> None:
 def delete_apps(config: object) -> None:
     """Deletes all running Apps in the domain"""
 
+    def delete_app(app):
+        if app["Status"] == "Deleted":
+            # App already deleted since before.
+            return
+        if app["Status"] == "Pending":
+            click.secho(
+                f"App type {app['AppType']} is already pending deletion", fg="red"
+            )
+            # Already pending deletion
+            return
+        if app["Status"] == "Deleting":
+            click.secho(
+                f"App type {app['AppType']} is in the process of deletion.", fg="red"
+            )
+            # Already pending deletion
+            return
+
+        try:
+            sm_client.delete_app(
+                DomainId=app["DomainId"],
+                AppName=app["AppName"],
+                AppType=app["AppType"],
+                SpaceName=app["SpaceName"],
+            )
+            click.echo(f"Deleted app of type: {app['AppType']}")
+        except sm_client.exceptions.ResourceInUse:
+            click.secho("App currently in use... Can not delete right now.", fg="red")
+        except Exception as e:
+            click.secho(f"Error deleting app {app}: \n{str(e)}", fg="red")
+
+    sm_client = boto3.client("sagemaker", config.region)
+
     response = sm_client.list_apps(DomainIdEquals=config.domain_id)
     apps = response["Apps"]
 
@@ -166,39 +202,11 @@ def delete_apps(config: object) -> None:
         executor.map(delete_app, apps)
 
 
-def delete_app(app):
-    if app["Status"] == "Deleted":
-        # App already deleted since before.
-        return
-    if app["Status"] == "Pending":
-        click.secho(f"App type {app['AppType']} is already pending deletion", fg="red")
-        # Already pending deletion
-        return
-    if app["Status"] == "Deleting":
-        click.secho(
-            f"App type {app['AppType']} is in the process of deletion.", fg="red"
-        )
-        # Already pending deletion
-        return
-
-    try:
-        sm_client.delete_app(
-            DomainId=app["DomainId"],
-            AppName=app["AppName"],
-            AppType=app["AppType"],
-            SpaceName=app["SpaceName"],
-        )
-        click.echo(f"Deleted app of type: {app['AppType']}")
-    except sm_client.exceptions.ResourceInUse:
-        click.secho("App currently in use... Can not delete right now.", fg="red")
-    except Exception as e:
-        click.secho(f"Error deleting app {app}: \n{str(e)}", fg="red")
-
-
 def get_or_create_table() -> str:
     """Gets or creates a DDB table for keeping state"""
 
     ddb_client = boto3.client("dynamodb")
+
     try:
         response = ddb_client.list_tables()
         table_list = [i for i in response["TableNames"] if i.startswith("studio-cli-")]
