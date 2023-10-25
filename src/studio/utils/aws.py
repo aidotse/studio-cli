@@ -1,7 +1,22 @@
 import boto3
 import click
 import time
+import re
 from concurrent.futures import ThreadPoolExecutor
+
+
+def getUsernameFromEmail(email: str) -> str:
+    """Gets username from email
+
+    Parameters:
+        email (str): an email adress
+
+    Returns:
+        str: username
+    """
+    username = re.sub(r"[^a-zA-Z0-9]+", "", email.split("@")[0])
+
+    return username
 
 
 def create_sagemaker_user_profiles(config: object, users: list) -> None:
@@ -18,8 +33,8 @@ def create_sagemaker_user_profiles(config: object, users: list) -> None:
     sm_client = boto3.client("sagemaker", config.region)
 
     with click.progressbar(users, label="Creating SM user profiles") as users_list:
-        for user in users_list:
-            username = user.split("@")[0].replace(".", "-")
+        for user_email in users_list:
+            username = getUsernameFromEmail(user_email)
             try:
                 sm_client.describe_user_profile(
                     DomainId=config.domain_id, UserProfileName=username
@@ -35,7 +50,7 @@ def create_sagemaker_user_profiles(config: object, users: list) -> None:
 
                 except:
                     click.secho(
-                        f"User with name '{user}' could not be created for some reason. Skipping",
+                        f"User with name '{user_email}' could not be created for some reason. Skipping",
                         fg="red",
                     )
     return
@@ -97,7 +112,7 @@ def get_presigned_urls(config: object, users: list) -> list:
 
     users_to_urls = {}
     for user_email, team in users.items():
-        username = user_email.split("@")[0].replace(".", "-")
+        username = getUsernameFromEmail(user_email)
         team = str(team)
 
         try:
@@ -130,7 +145,7 @@ def delete_users(config: object, user_emails: str) -> None:
         user_emails, label="Deleting SM user profiles"
     ) as users_emails:
         for email in users_emails:
-            username = email.split("@")[0].replace(".", "-")
+            username = getUsernameFromEmail(email)
             try:
                 sm_client.delete_user_profile(
                     DomainId=config.domain_id, UserProfileName=username
