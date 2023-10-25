@@ -1,0 +1,3 @@
+[console_scripts]
+studio = studio.studio:cli
+

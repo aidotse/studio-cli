@@ -1,0 +1,14 @@
+README.md
+setup.cfg
+setup.py
+src/studio/__init__.py
+src/studio/studio.py
+src/studio/utils/__init__.py
+src/studio/utils/aws.py
+src/studio/utils/cli.py
+src/studio_cli.egg-info/PKG-INFO
+src/studio_cli.egg-info/SOURCES.txt
+src/studio_cli.egg-info/dependency_links.txt
+src/studio_cli.egg-info/entry_points.txt
+src/studio_cli.egg-info/requires.txt
+src/studio_cli.egg-info/top_level.txt
