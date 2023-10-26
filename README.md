@@ -93,3 +93,12 @@ Run this when
 > Purge: The purge command tries to use the API to delete all related resources. There are a lot fo dependencies between the different resources, meaning that some resources can't be deleted untill others are. i.e a space cannot be deleted untill all apps runnning in that space have been deleted. To avoid having a command running for 30 minutes, some resource deleteions are skipped in case there are deletions in progress for resources it's depending on. This mean that the purge command may have to be run several times, preferably with some time in between.
 
 > Same Email: SM user profiles are created based on the email. If users share the first part of the email, i.e niklas@amazon.com and niklas@ai.se, the last occuring person in the list will not get a user profile created. This is known issue with the current implementation.
+
+### Limits
+
+These are some, but not an extensive list of AWS service limits you need to be mindful of.
+
+- Allowed studio profiles per SM Domain. (This maps to the number of participants)
+- Maximum number of Studio spaces allowed per account. (This maps to the number of teams)
+- Studio KernelGateway Apps running on <Instance type> instance. (These are the underlying instances. Note that the ml instances are different to the EC2 instances, with different qoutas.)
+- Max number of running studio Apps (Each team has a **minimum** of 2, but probably more depending on what underlying Image they run on their instances.)
