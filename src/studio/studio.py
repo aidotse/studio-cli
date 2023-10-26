@@ -44,7 +44,7 @@ def configure():
             click.secho("That's not the Domain ID, and you know it", fg="red")
         domain_id = click.prompt("Enter the SageMaker Studio Domain ID", type=str)
 
-    table_name = get_or_create_table()
+    table_name = get_or_create_table(region)
 
     store_configuration(
         {"region": region, "domain_id": domain_id, "table_name": table_name}
