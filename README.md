@@ -102,3 +102,7 @@ These are some, but not an extensive list of AWS service limits you need to be m
 - Maximum number of Studio spaces allowed per account. (This maps to the number of teams)
 - Studio KernelGateway Apps running on <Instance type> instance. (These are the underlying instances. Note that the ml instances are different to the EC2 instances, with different qoutas.)
 - Max number of running studio Apps (Each team has a **minimum** of 2, but probably more depending on what underlying Image they run on their instances.)
+
+### Web App
+
+If you want hackathon participants to have a lightweigh web app where they can enter their email and get redirected to their teams SageMaker Studio Space, follow the instructions in [web-app/README.md](web-app/README.md)
