@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Studio CLI frontend hosting and API
+
+Globals:
+  Function:
+    Timeout: 6
+    MemorySize: 128
+
+Resources:
+  ### API
+  GenSigninUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: gen_presign_signin/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Policies:
+        - AmazonDynamoDBFullAccess
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - sagemaker:CreatePresignedDomainUrl
+              Resource: "*"
+
+      Events:
+        geturl:
+          Type: Api
+          Properties:
+            Path: /geturl
+            Method: post
+            RestApiId: !Ref ApiGatewayApi
+
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'POST'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+        MaxAge: "'600'"
+
+  GenSigninUrlFunctionLogGroup: # To ensure Lambda logs are deleted after a while.
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GenSigninUrlFunction}"
+      RetentionInDays: 7
+
+  ### STATIC HOSTING
+  # Bucket to host static web assets
+  HostingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+
+  # Identity to allow cloudFront to access our private bucket.
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: Default Origin Access Control
+        Name: !Ref AWS::StackName
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # Bucket policy that allows the aboe OAI to access the bucket.
+  HostingBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref HostingBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Sub ${HostingBucket.Arn}/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudfrontDistribution}
+
+  # CDN to front and cache the website
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: true
+          DefaultTTL: 60
+          MaxTTL: 240
+          MinTTL: 60
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+            Cookies:
+              Forward: none
+            QueryString: false
+          TargetOriginId: S3Origin
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        PriceClass: PriceClass_All
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt HostingBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+        IPV6Enabled: false
+
+Outputs:
+  GetUrlAPI:
+    Description: API Gateway endpoint to generate a presigned URL
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/geturl/"
+  DomainUrlCloudfront:
+    Value: !GetAtt CloudfrontDistribution.DomainName
+    Description: Cloudfront distribution URL.
+  HostingBucketName:
+    Value: !Ref HostingBucket
+    Description: Name of S3 bucket used for hosting.
