@@ -92,7 +92,7 @@ def create_sagemaker_spaces(config: object, team_list: list) -> None:
 def add_users_to_ddb(config: object, users: object) -> None:
     """Stores all users and teams in DDB for easier state management"""
 
-    ddb_client = boto3.resource("dynamodb")
+    ddb_client = boto3.resource("dynamodb", config.region)
     table_resource = ddb_client.Table(config.table_name)
     try:
         with table_resource.batch_writer() as batch:
@@ -219,10 +219,17 @@ def delete_apps(config: object) -> None:
         executor.map(delete_app, apps)
 
 
-def get_or_create_table() -> str:
-    """Gets or creates a DDB table for keeping state"""
+def get_or_create_table(region: str) -> str:
+    """Gets or creates a DDB table for keeping state
 
-    ddb_client = boto3.client("dynamodb")
+    Parameters:
+        region (str): AWS Region to use
+
+    Returns:
+        str: Name of DDB table
+    """
+
+    ddb_client = boto3.client("dynamodb", region)
 
     try:
         response = ddb_client.list_tables()
@@ -257,7 +264,7 @@ def get_or_create_table() -> str:
 
 def get_users_from_ddb(config: object) -> object:
     """Gets all users from DDB"""
-    dynamodb_resource = boto3.resource("dynamodb")
+    dynamodb_resource = boto3.resource("dynamodb", config.region)
     table = dynamodb_resource.Table(config.table_name)
 
     # Perform a scan operation to get all items in the table
@@ -281,7 +288,7 @@ def get_users_from_ddb(config: object) -> object:
 def clear_ddb(config: object) -> None:
     """Deletes all items in the configured DDB table"""
 
-    dynamodb_resource = boto3.resource("dynamodb")
+    dynamodb_resource = boto3.resource("dynamodb", config.region)
     table = dynamodb_resource.Table(config.table_name)
 
     click.echo("Clearing DDB table...")
