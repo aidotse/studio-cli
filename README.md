@@ -74,7 +74,8 @@ studio get-urls
 
 Run this when
 
-- you want to generate presigned URLs (valid for 5 minutes) to distribute to hackathon participants
+- you want to generate presigned URLs (valid for 5 minutes) to distribute to hackathon participants.
+  > Note: This is not necessary if you use the web-app
 
 ### Finish an event
 
