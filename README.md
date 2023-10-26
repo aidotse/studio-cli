@@ -24,8 +24,8 @@ pip install .
 For convenience, and to avoid installing the CLI/Python dependencies on your machine you can use Docker to run the CLI.
 
 ```bash
-docker build . -t studio-cli # Build the Docker image and tag it as "hackathon-cli"
-docker run -it --rm studio-cli # Run the CLI in a container (and remove the container when exiting)
+docker build . -t hackathon-cli # Build the Docker image and tag it as "hackathon-cli"
+docker run -it --rm hackathon-cli # Run the CLI in a container (and remove the container when exiting)
 ```
 
 This will launch an interactive shell inside the Docker container with the CLI pre-installed. From there you can run any of the CLI commands as documented below.
