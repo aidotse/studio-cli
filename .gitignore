@@ -245,3 +245,5 @@ $RECYCLE.BIN/
 
 # AWS SAM artefacts
 *.aws-sam*
+
+node_modules
