@@ -99,8 +99,8 @@ Resources:
             - HEAD
             - OPTIONS
           Compress: true
-          DefaultTTL: 60
-          MaxTTL: 240
+          DefaultTTL: 10800
+          MaxTTL: 86400
           MinTTL: 60
           ViewerProtocolPolicy: redirect-to-https
           ForwardedValues:
