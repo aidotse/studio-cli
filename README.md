@@ -19,9 +19,9 @@ In the root of the directory, run
 pip install .
 ```
 
-### Docker
+### Using Docker (Optional)
 
-For convenience, and to avoid installing the CLI/Python dependencies on your machine you can use Docker to run the CLI.
+For convenience, and to avoid installing the CLI/Python dependencies on your machine you can optionally use Docker to run the CLI.
 
 ```bash
 docker build . -t studio-cli # Build the Docker image and tag it as "studio-cli"
