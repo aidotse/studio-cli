@@ -45,7 +45,7 @@ After the backend has completed deploying, change the `API_URL` placeholder in `
 Then, in the `frontend`` directory, run
 
 ```bash
-npm run build && aws s3 cp build/ s3://<HOSTING-BUCKET-NAME>/ --recursive
+npm install && npm run build && aws s3 cp build/ s3://<HOSTING-BUCKET-NAME>/ --recursive
 ```
 
 replacing the `<HOSTING-BUCKET-NAME>` with the name of the hosting bucket in output of the backend deployment step. This copies the React build artefact to the S3 bucket fronted by the CloudFront distribution.
