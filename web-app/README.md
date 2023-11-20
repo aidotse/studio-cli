@@ -28,7 +28,7 @@ sam build && sam deploy \
             --tags project=hackathon
 ```
 
-This takes a few minutes due to a CloudFront distribution being set up to front the hosting bucket
+This takes a few minutes due to a CloudFront distribution being set up to front the hosting bucket. If you have a different python version installed, or experience errors with the build command, run the build inside a container `sam build --use-container`
 
 Take note of the outputs from deployment:
 
