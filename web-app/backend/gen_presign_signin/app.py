@@ -19,7 +19,7 @@ if table_list:
     table = table_list[0]
 
 
-def getUsernameFromEmail(email: str) -> str:
+def get_username_from_email(email: str) -> str:
     """Gets username from email
 
     Parameters:
@@ -99,7 +99,7 @@ def lambda_handler(event, context):
 
     user_item = response["Item"]
 
-    username = getUsernameFromEmail(user_item["pk"])
+    username = get_username_from_email(user_item["pk"])
     team = user_item["team"]
     domain_id = user_item["domain-id"]
 

@@ -5,7 +5,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 
 
-def getUsernameFromEmail(email: str) -> str:
+def get_username_from_email(email: str) -> str:
     """Gets username from email
 
     Parameters:
@@ -34,7 +34,7 @@ def create_sagemaker_user_profiles(config: object, users: list) -> None:
 
     with click.progressbar(users, label="Creating SM user profiles") as users_list:
         for user_email in users_list:
-            username = getUsernameFromEmail(user_email)
+            username = get_username_from_email(user_email)
             try:
                 sm_client.describe_user_profile(
                     DomainId=config.domain_id, UserProfileName=username
@@ -112,7 +112,7 @@ def get_presigned_urls(config: object, users: list) -> list:
 
     users_to_urls = {}
     for user_email, team in users.items():
-        username = getUsernameFromEmail(user_email)
+        username = get_username_from_email(user_email)
         team = str(team)
 
         try:
@@ -145,7 +145,7 @@ def delete_users(config: object, user_emails: str) -> None:
         user_emails, label="Deleting SM user profiles"
     ) as users_emails:
         for email in users_emails:
-            username = getUsernameFromEmail(email)
+            username = get_username_from_email(email)
             try:
                 sm_client.delete_user_profile(
                     DomainId=config.domain_id, UserProfileName=username
