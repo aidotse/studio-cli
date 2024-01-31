@@ -84,7 +84,6 @@ def create_sagemaker_spaces(config: object, team_list: list) -> None:
                         f"Space with name '{team}' could not be created for some reason. Skipping\n\n {str(e)}",
                         fg="red",
                     )
-                    click
 
     return
 
