@@ -40,18 +40,16 @@ Here's how to use some of the more useful commands
 studio configure
 ```
 
-Persists the configuration, including region, Studio domain ID and DDB table name.
+Run this when
+
+- you configure the tool before a hackathon
+
+Persists the configuration, including region, Studio domain ID and DDB table name. It creates a DDB table if none exists.
 
 ### Show current configuration
 
 ```bash
 studio get-conf
-```
-
-### Configure the CLI
-
-```bash
-studio configure
 ```
 
 ### Setup users and teams
@@ -64,7 +62,7 @@ where users.csv is a csv with 2 columns, an email and a team number. See sample.
 
 Run this when
 
-- you have all participants and team divisions before an event, to create SM user profiles and SM team spaces.
+- you have all participants and team divisions before an event, to create SM user profiles and bootstrap spaces.
 
 ### Get presigned URLs
 
@@ -75,7 +73,8 @@ studio get-urls
 Run this when
 
 - you want to generate presigned URLs (valid for 5 minutes) to distribute to hackathon participants.
-  > Note: This is not necessary if you use the web-app
+  > [!NOTE]
+  > This is not necessary if you use the web-app.
 
 ### Finish an event
 
@@ -91,9 +90,9 @@ Run this when
 
 ### Issues
 
-> Purge: The purge command tries to use the API to delete all related resources. There are a lot of dependencies between the different resources, meaning that some resources can't be deleted untill others are. i.e a space cannot be deleted untill all apps runnning in that space have been deleted. To avoid having a command running for 30 minutes, some resource deleteions are skipped in case there are deletions in progress for resources it's depending on. This mean that the purge command may have to be run several times, preferably with some time in between.
-
-> Same Email: SM user profiles are created based on the email. If users share the first part of the email, i.e niklas@amazon.com and niklas@ai.se, the last occuring person in the list will not get a user profile created. This is known issue with the current implementation.
+> [!WARNING]  
+> **Purge**: The purge command tries to use the API to delete all related resources. There are a lot of dependencies between the different resources, meaning that some resources can't be deleted untill others are. i.e a space cannot be deleted untill all apps runnning in that space have been deleted. To avoid having a command running for 30 minutes, some resource deleteions are skipped in case there are deletions in progress for resources it's depending on. This mean that the purge command may have to be run several times, preferably with some time in between.
+> **Same Email**: SM user profiles are created based on the email. If users share the first part of the email, i.e niklas@amazon.com and niklas@ai.se, the last occuring person in the list will not get a user profile created. This is known issue with the current implementation.
 
 ### Limits
 
