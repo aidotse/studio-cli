@@ -100,7 +100,7 @@ def lambda_handler(event, context):
     user_item = response["Item"]
 
     username = get_username_from_email(user_item["pk"])
-    team = user_item["team"]
+    space_name = f"{username}-space"
     domain_id = user_item["domain-id"]
 
     try:
@@ -109,7 +109,7 @@ def lambda_handler(event, context):
             UserProfileName=username,
             SessionExpirationDurationInSeconds=43200,  # 3 days
             ExpiresInSeconds=300,  # 5 minutes
-            SpaceName=team,
+            # SpaceName=space_name,
         )
 
         presigned = response["AuthorizedUrl"]

@@ -74,7 +74,7 @@ def require_cli_config(func):
     return wrapper
 
 
-def get_users(config: object, path: str) -> object:
+def get_users(config: object, path: str) -> dict:
     """Reads a csv and returns the users
 
     Parameters:
@@ -82,32 +82,46 @@ def get_users(config: object, path: str) -> object:
         path (str): path to user csv file
 
     Returns:
-        object: {'email':'team'}
+        dict: {'email':'team'}
     """
 
     users = {}
 
     with open(path, "r", newline="") as csvfile:
+        # Determine if the CSV has headers
+        has_headers = csv.Sniffer().has_header(csvfile.read(1024))
+        csvfile.seek(0)  # Rewind the file to the beginning
+
         csvreader = csv.reader(csvfile)
+        header = next(csvreader) if has_headers else None
+
         for row in csvreader:
-            # Check if each row has exactly two columns and the second column is a string
-            if not len(row) == 2:
-                click.secho("That's more columns than I was expecting", fg="red")
-                sys.exit()
-
             try:
-                int_value = int(row[1])
-            except (ValueError, TypeError):
-                click.secho(f"Team number provided is not an int: {row[1]}", fg="red")
-                sys.exit()
+                email_index = header.index("email") if has_headers else 0
+                team_index = header.index("team") if has_headers else 1
 
-            if not is_valid_email(row[0]):
-                click.secho(f"{row[0]} is not a valid email address", fg="red")
-                sys.exit()
+                email = row[email_index].strip()
+                team = row[team_index].strip()
 
-            email = row[0].strip()
-            team = str(row[1]).strip()
-            users[email] = team
+                if not email or not team:
+                    raise ValueError("Email and team cannot be empty")
+
+                if not is_valid_email(email):
+                    raise ValueError(f"{email} is not a valid email address")
+
+                if not team.isnumeric():
+                    raise ValueError(
+                        f"Team number provided is not a valid integer: {team}"
+                    )
+
+                users[email] = int(team)
+
+            except ValueError as e:
+                click.secho(f"Error processing CSV row: {e}", fg="red")
+                sys.exit(1)
+            except IndexError:
+                click.secho("CSV format does not match expected structure", fg="red")
+                sys.exit(1)
 
     if config.verbose:
         click.echo("Users:")
