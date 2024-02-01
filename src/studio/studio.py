@@ -71,11 +71,10 @@ def get_conf(config):
 @click.argument("path", type=click.Path(exists=True))
 def setup_users(config, path):
     """Creates users and teams"""
-
-    click.echo("Setting up users...")
-
     # Reset DynamoDB
     clear_ddb(config)
+
+    click.echo("\n** Setting up users... **")
 
     # Get users from provided csv
     users = get_users(config, path)
@@ -83,8 +82,8 @@ def setup_users(config, path):
     # Create SM user profiles for each participant
     create_sagemaker_user_profiles(config, users.keys())
 
-    # Create SM Spaces for each team
-    create_sagemaker_spaces(config, users.values())
+    # Create SM Space for each user
+    create_sagemaker_spaces(config, users.keys())
 
     # Store users in DDB for downstream usage.
     add_users_to_ddb(config, users)
@@ -114,18 +113,31 @@ def get_urls(config):
 @require_cli_config
 def purge(config):
     """Deletes all Hackathon SM User profiles, running SM apps, SM spaces etc."""
-
-    # Get users from state in DDB
-    users = get_users_from_ddb(config)
-
-    # Delete SM user profiles
-    delete_users(config, users.keys())
+    deleted_all_apps = False
+    deleted_all_spaces = False
+    deleted_all_users = False
 
     # Delete running SM apps in the SM domain
-    delete_apps(config)
+    deleted_all_apps = delete_apps(config)
 
-    # Delete SM spaces in the SM domain
-    delete_spaces(config)
+    if deleted_all_apps:
+        # Delete SM spaces in the SM domain
+        deleted_all_spaces = delete_spaces(config)
 
-    # Reset DynamoDB
-    clear_ddb(config)
+    if deleted_all_spaces:
+        # Delete SM user profiles
+        deleted_all_users = delete_users(config)
+
+    if deleted_all_users:
+        # Reset DynamoDB
+        clear_ddb(config)
+        click.secho(
+            "\nAll SageMaker assets have been deleted. If you've deployed a frontend don't forget to delete that as well.\n",
+            fg="yellow",
+        )
+
+    # users = get_users_from_ddb(config)
+
+    else:
+        click.secho("\n\nCould not completely purge the environment", fg="red")
+        click.secho("Try running the purge command again in a minute or two.", fg="red")
