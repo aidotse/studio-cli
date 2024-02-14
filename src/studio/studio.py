@@ -47,7 +47,7 @@ def configure():
     table_name = get_or_create_table(region)
 
     store_configuration(
-        {"region": region, "domain_id": domain_id, "table_name": table_name}
+        {"region": region, "domain_id": domain_id.strip(), "table_name": table_name}
     )
 
     click.secho("\n\U0001F973 studio cli is now ready to be used", fg="cyan")
