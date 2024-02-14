@@ -73,8 +73,9 @@ studio get-urls
 Run this when
 
 - you want to generate presigned URLs (valid for 5 minutes) to distribute to hackathon participants.
-  > [!INFO]
-  > This is not necessary if you use the web-app.
+
+> [!NOTE]
+> This is not necessary if you use the web-app to grant users access to their environment.
 
 ### Finish an event
 
@@ -111,3 +112,6 @@ A general recommendation is to test well in advance of the hackathon to be able 
 ### Web App
 
 If you want hackathon participants to have a lightweigh web app where they can enter their email and get redirected to their teams SageMaker Studio Space, follow the instructions in [web-app/README.md](web-app/README.md)
+
+> [!CAUTION]  
+> The web-app is a passwordless fronend where participants simply enter their email to get access.
