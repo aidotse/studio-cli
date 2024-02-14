@@ -73,7 +73,7 @@ studio get-urls
 Run this when
 
 - you want to generate presigned URLs (valid for 5 minutes) to distribute to hackathon participants.
-  > [!NOTE]
+  > [!INFO]
   > This is not necessary if you use the web-app.
 
 ### Finish an event
@@ -88,10 +88,13 @@ Run this when
 
 - The event is over to delete all SM user profiles and SM spaces and apps.
 
-### Issues
+### Known Issues
 
 > [!WARNING]  
+> Below are some known issues
+
 > **Purge**: The purge command tries to use the API to delete all related resources. There are a lot of dependencies between the different resources, meaning that some resources can't be deleted untill others are. i.e a space cannot be deleted untill all apps runnning in that space have been deleted. To avoid having a command running for 30 minutes, some resource deleteions are skipped in case there are deletions in progress for resources it's depending on. This mean that the purge command may have to be run several times, preferably with some time in between.
+
 > **Same Email**: SM user profiles are created based on the email. If users share the first part of the email, i.e niklas@amazon.com and niklas@ai.se, the last occuring person in the list will not get a user profile created. This is known issue with the current implementation.
 
 ### Limits
